@@ -1,0 +1,172 @@
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Succint's Memory Match</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: white;
+      color: #333;
+    }
+    h1, p {
+      color: #f828c2;
+    }
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      gap: 10px;
+      width: 440px;
+      margin: 20px auto;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background: #f828c2;
+      color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: transform 0.3s;
+      overflow: hidden;
+    }
+    .card.flipped, .card.matched {
+      background: yellow;
+      transform: rotateY(180deg);
+    }
+    .card.matched {
+      background: #fba2fb;
+    }
+    .card img {
+      width: 90px;
+      height: 180px;
+      object-fit: contain;
+    }
+    #message {
+      font-size: 20px;
+      margin-top: 20px;
+      color: #f828c2;
+    }
+    button {
+      background: #f828c2;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: yellow;
+    }
+  </style>
+</head>
+<body>
+  <h1>Succint's Memory Match</h1>
+  <p>Match tech terms and logos in the fewest moves possible!</p>
+  <div id="game-board"></div>
+  <div id="message"></div>
+  <button onclick="resetGame()">Reset Game</button>
+
+  <script>
+    const succ = "https://blog.succinct.xyz/content/images/2024/10/full-logo-1.png";
+    const oxcrashout = "https://preview.redd.it/aaron-paul-in-the-early-2000s-v0-9a1dz5y0iv1b1.jpg?width=640&crop=smart&auto=webp&s=8d05fd924b1c4bb5bfc34f0c745ccd6a7305f7c4"
+
+    const terms = [
+      { value: 'succint-logo', src: succ, alt: 'SuccintLabs Logo' },
+      { value: 'succint-logo', src: succ, alt: 'SuccintLabs Logo' },
+      { value: 'UI/UX', text: 'ZK-Proof' },
+      { value: 'UI/UX', text: 'ZK-Proof' },
+      { value: 'Agile', text: 'Prover' },
+      { value: 'Agile', text: 'Prover' },
+      { value: 'Cloud', text: 'SP1' },
+      { value: 'Cloud', text: 'SP1' },
+      { value: 'Simplify', text: 'Vapps' },
+      { value: 'Simplify', text: 'Vapps' },
+      { value: 'Innovate', text: 'Stars' },
+      { value: 'Innovate', text: 'Stars' },
+      { value: 'User-First', src: oxcrashout, alt:'oxcrashout' },
+      {value: 'User-First', src: oxcrashout, alt:'oxcrashout' },
+      { value: 'Tech', text: 'Tech' },
+      { value: 'Tech', text: 'Tech' }
+    ];
+
+    let flippedCards = [];
+    let matchedCards = [];
+    let moves = 0;
+
+    function createBoard() {
+      const board = document.getElementById('game-board');
+      board.innerHTML = '';
+      const shuffledTerms = terms.sort(() => Math.random() - 0.5);
+      shuffledTerms.forEach((term, index) => {
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.dataset.value = term.value;
+        card.dataset.index = index;
+        card.addEventListener('click', flipCard);
+        board.appendChild(card);
+      });
+      document.getElementById('message').textContent = 'Moves: 0';
+    }
+
+    function flipCard() {
+      if (flippedCards.length < 2 && !flippedCards.includes(this) && !matchedCards.includes(this.dataset.index)) {
+        this.classList.add('flipped');
+        const term = terms.find(t => t.value === this.dataset.value);
+        if (term.src) {
+          const img = document.createElement('img');
+          img.src = term.src;
+          img.alt = term.alt;
+          this.innerHTML = '';
+          this.appendChild(img);
+        } else {
+          this.textContent = term.text;
+        }
+        flippedCards.push(this);
+
+        if (flippedCards.length === 2) {
+          moves++;
+          document.getElementById('message').textContent = `Moves: ${moves}`;
+          checkMatch();
+        }
+      }
+    }
+
+    function checkMatch() {
+      const [card1, card2] = flippedCards;
+      if (card1.dataset.value === card2.dataset.value) {
+        card1.classList.add('matched');
+        card2.classList.add('matched');
+        matchedCards.push(card1.dataset.index, card2.dataset.index);
+        flippedCards = [];
+        if (matchedCards.length === terms.length) {
+          document.getElementById('message').textContent = 
+            `You won in ${moves} moves! Simplifying tech, one match at a time – SuccintLabs`;
+        }
+      } else {
+        setTimeout(() => {
+          card1.classList.remove('flipped');
+          card2.classList.remove('flipped');
+          card1.innerHTML = '';
+          card2.innerHTML = '';
+          flippedCards = [];
+        }, 1000);
+      }
+    }
+
+    function resetGame() {
+      flippedCards = [];
+      matchedCards = [];
+      moves = 0;
+      createBoard();
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
